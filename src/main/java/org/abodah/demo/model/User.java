@@ -8,8 +8,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
@@ -47,7 +47,7 @@ public class User extends DateAudit implements UserDetails {
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "personnes")
 	private Set<Document> uploadedDocuments = new HashSet<>(0);
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
 
@@ -181,7 +181,11 @@ public class User extends DateAudit implements UserDetails {
 
 	@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles.stream().map(SimpleGrantedAuthority::new).collect(toList());
+		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+	    for (Role role : roles){
+	        grantedAuthorities.add(new SimpleGrantedAuthority(role.getName().name()));
+	    }
+	    return grantedAuthorities;
     }
 	
 	@Override

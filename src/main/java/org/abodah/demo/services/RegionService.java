@@ -20,6 +20,10 @@ public class RegionService {
 	public Region find(Long id) {
 		return regionRepo.findById(id).get();
 	}
+
+	public Region findByName(String regionName) {
+		return regionRepo.findByName(regionName).get();
+	}
 	
 	
 }

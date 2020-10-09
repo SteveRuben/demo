@@ -14,22 +14,29 @@ import org.springframework.web.filter.GenericFilterBean;
 
 public class JwtTokenFilter extends GenericFilterBean {
 
-    private JwtTokenProvider jwtTokenProvider;
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+		// TODO Auto-generated method stub
+		
+	}
 
-    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
-
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
-        throws IOException, ServletException {
-
-        String token = jwtTokenProvider.resolveToken((HttpServletRequest) req);
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication auth = token != null ? jwtTokenProvider.getAuthentication(token) : null;
-            SecurityContextHolder.getContext().setAuthentication(auth);
-        }
-        filterChain.doFilter(req, res);
-    }
+//    private JwtTokenProvider jwtTokenProvider;
+//
+//    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
+//        this.jwtTokenProvider = jwtTokenProvider;
+//    }
+//
+//    @Override
+//    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
+//        throws IOException, ServletException {
+//
+//        String token = jwtTokenProvider.resolveToken((HttpServletRequest) req);
+//        if (token != null && jwtTokenProvider.validateToken(token)) {
+//            Authentication auth = token != null ? jwtTokenProvider.getAuthentication(token) : null;
+//            SecurityContextHolder.getContext().setAuthentication(auth);
+//        }
+//        filterChain.doFilter(req, res);
+//    }
 
 }
