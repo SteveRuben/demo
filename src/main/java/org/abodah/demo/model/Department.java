@@ -9,11 +9,14 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.springframework.hateoas.RepresentationModel;
 
 @Entity
+@Table(name = "BQ_DEPARTEMENT")
 public class Department extends RepresentationModel<Department> implements Serializable {
 
 	/**
@@ -26,9 +29,12 @@ public class Department extends RepresentationModel<Department> implements Seria
 	private String code;
 	private String name;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "arrondissements" ,cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "departement" ,cascade = CascadeType.ALL)
 	private Set<Arrondissement> arrondissements = new HashSet<>(0);
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	Region region;
+	
 	public Long getId() {
 		return id;
 	}

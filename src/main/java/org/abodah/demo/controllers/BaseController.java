@@ -14,6 +14,7 @@ public class BaseController {
 	 * @param basePath - base path provided by Spring Data REST
 	 * @return new {@link Link} with these two values melded together
 	 */
+	@SuppressWarnings("unused")
 	private static Link applyBasePath(Link link, String basePath) {
 
 		URI uri = link.toUri();

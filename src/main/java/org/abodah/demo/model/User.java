@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,12 +13,18 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+@Table(name = "BQ_USER")
 public class User extends DateAudit implements UserDetails {
 
 	/**
@@ -38,18 +46,34 @@ public class User extends DateAudit implements UserDetails {
 	private String phoneNumber;
 	private String status;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "location")
+	@ManyToOne(fetch = FetchType.LAZY)
 	Arrondissement arrondissement;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "occupations")
+	@ManyToOne
 	Occupation occupation;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "personnes")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "uploadedBy")
 	private Set<Document> uploadedDocuments = new HashSet<>(0);
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
+
+	@JsonIgnore
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "group_users", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
+	private Set<UserGroup> userGroups = new HashSet<>();
+
+	public User(String name2, String username2, String email2, String password2) {
+		this.name = name2;
+		this.username = username2;
+		this.email = email2;
+		this.password = password2;
+	}
+	
+	public void addUploadedDocument(Document documentUploaded){
+        documentUploaded.setUploadedBy(this);
+    }
 
 	public Long getId() {
 		return id;
@@ -179,29 +203,41 @@ public class User extends DateAudit implements UserDetails {
 		this.roles = roles;
 	}
 
-	@Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-	    for (Role role : roles){
-	        grantedAuthorities.add(new SimpleGrantedAuthority(role.getName().name()));
-	    }
-	    return grantedAuthorities;
-    }
 	
+	public Set<UserGroup> getUserGroups() {
+		return userGroups;
+	}
+
+	public void setUserGroups(Set<UserGroup> userGroups) {
+		this.userGroups = userGroups;
+	}
+
 	@Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+		for (Role role : roles) {
+			grantedAuthorities.add(new SimpleGrantedAuthority(role.getName().name()));
+		}
+		return grantedAuthorities;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 }

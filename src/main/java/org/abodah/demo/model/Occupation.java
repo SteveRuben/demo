@@ -9,10 +9,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.springframework.hateoas.RepresentationModel;
 
 @Entity
+@Table(name = "BQ_OCCUPATION")
 public class Occupation extends RepresentationModel<Occupation> implements Serializable {
 
 	/**
@@ -26,7 +28,7 @@ public class Occupation extends RepresentationModel<Occupation> implements Seria
 	private String name;
 	private Department departement;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "personnes")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "ocupation")
 	private Set<Document> documents = new HashSet<>(0);
 
 	public Long getId() {

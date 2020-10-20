@@ -10,10 +10,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.springframework.hateoas.RepresentationModel;
 
 @Entity
+@Table(name = "BQ_REGION")
 public class Region extends RepresentationModel<Region> implements Serializable {
 
 	/**
@@ -26,7 +28,7 @@ public class Region extends RepresentationModel<Region> implements Serializable 
 	private String code;
 	private String name;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "departement" ,cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "region" ,cascade = CascadeType.ALL)
 	private Set<Department> departement = new HashSet<>(0);
 
 	public Long getId() {

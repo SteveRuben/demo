@@ -15,7 +15,7 @@ public class DataSysApplication {
 
 	public static void main(String[] args) {
 		LocalDate now = LocalDate.now();
-		LocalDate expirationDate = LocalDate.of(2020, 10, 10);
+		LocalDate expirationDate = LocalDate.of(2020, 10, 25);
 		if (now.isBefore(expirationDate)) {
 			SpringApplication.run(DataSysApplication.class, args);
 		} else {

@@ -1,12 +1,8 @@
 package org.abodah.demo.config;
 
-import java.util.Arrays;
-
-import org.abodah.demo.model.User;
 import org.abodah.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,9 +10,9 @@ public class DataInitializer implements CommandLineRunner {
 
 	@Autowired
 	UserRepository users;
-
-	@Autowired
-	PasswordEncoder passwordEncoder;
+//
+//	@Autowired
+//	PasswordEncoder passwordEncoder;
 
 	@Override
 	public void run(String... args) throws Exception {

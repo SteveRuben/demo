@@ -1,35 +1,110 @@
 package org.abodah.demo.controllers;
 
-//@RestController
-//@RequestMapping("/auth")
+import org.abodah.demo.config.JwtTokenProvider;
+import org.abodah.demo.config.payload.ApiResponse;
+import org.abodah.demo.config.payload.JwtAuthenticationResponse;
+import org.abodah.demo.config.payload.LoginRequest;
+import org.abodah.demo.config.payload.SignUpRequest;
+import org.abodah.demo.controllers.exception.AppException;
+import org.abodah.demo.model.Role;
+import org.abodah.demo.model.Role.RoleName;
+import org.abodah.demo.model.User;
+import org.abodah.demo.model.UserGroup;
+import org.abodah.demo.repositories.GroupRepository;
+import org.abodah.demo.repositories.RoleRepository;
+import org.abodah.demo.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.validation.Valid;
+import java.net.URI;
+import java.util.Collections;
+
+@RestController
+@RequestMapping("/api/auth")
 public class AuthController {
 
-//	@Autowired
-//	AuthenticationManager authenticationManager;
-//
-//	@Autowired
-//	JwtTokenProvider jwtTokenProvider;
-//
-//	@Autowired
-//	UserRepository users;
-//
-//	@PostMapping("/signin")
-//	public ResponseEntity signin(@RequestBody AuthenticationRequest data) {
-//
-//		try {
-//			String username = data.getUsername();
-//			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, data.getPassword()));
-//			String token = jwtTokenProvider.createToken(username, this.users.findByUsername(username)
-//					.orElseThrow(() -> new UsernameNotFoundException("Username " + username + "not found")).getRoles());
-//
-//			Map<Object, Object> model = new HashMap<>();
-//			model.put("username", username);
-//			model.put("token", token);
-//			return ok(model);
-//		} catch (AuthenticationException e) {
-//			throw new BadCredentialsException("Invalid username/password supplied");
-//		}
-//	}
-	
-	
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
+
+    @Autowired
+    GroupRepository groupRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    JwtTokenProvider tokenProvider;
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsernameOrEmail(),
+                        loginRequest.getPassword()
+                )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwt = tokenProvider.generateToken(authentication);
+        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+    }
+
+
+
+
+    @SuppressWarnings("unchecked")
+	@PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+        if(userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return new ResponseEntity(new ApiResponse(false, "Username is already taken!"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        // Creating user's account
+        User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
+                signUpRequest.getEmail(), signUpRequest.getPassword());
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        Role userRole = roleRepository.findByName(RoleName.USER)
+                .orElseThrow(() -> new AppException("User Role not set."));
+
+        user.setRoles(Collections.singleton(userRole));
+
+        UserGroup userGroup = groupRepository.findByGroupName("employee")
+                .orElseThrow(() -> new AppException("User Group not set."));
+
+        user.setUserGroups(Collections.singleton(userGroup));
+
+        User result = userRepository.save(user);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath().path("/api/users/{username}")
+                .buildAndExpand(result.getUsername()).toUri();
+
+        return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully"));
+    }
 }

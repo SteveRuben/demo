@@ -8,16 +8,20 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.abodah.demo.enums.ETypeDoc;
 import org.springframework.hateoas.RepresentationModel;
 
 @Entity
+@Table(name = "BQ_DOCUMENT")
 public class Document extends RepresentationModel<Document> implements Serializable {
 
 	public enum DOCUMENT_STATUS {
@@ -35,6 +39,7 @@ public class Document extends RepresentationModel<Document> implements Serializa
 	private String fileName;
 	private Date insertionDate;
 	private ETypeDoc typeDoc;
+	
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "document_status")
 	private DOCUMENT_STATUS status = DOCUMENT_STATUS.POSTED;
@@ -42,11 +47,15 @@ public class Document extends RepresentationModel<Document> implements Serializa
 
 	@Lob
 	private Blob file;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	Occupation ocupation;
+
 	@ManyToOne
 	@JoinColumn(name = "uploaded_by_user_id", nullable = false)
 	private User uploadedBy;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "approved_by_user_id")
 	private User approvedBy;
 
