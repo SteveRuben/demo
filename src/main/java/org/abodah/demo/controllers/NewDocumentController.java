@@ -6,6 +6,7 @@ import org.abodah.demo.config.UserPrincipal;
 import org.abodah.demo.controllers.request.PostNewDocumentRequest;
 import org.abodah.demo.model.Document;
 import org.abodah.demo.model.User;
+import org.abodah.demo.qrcodegenerator.QRCodeGenerator;
 import org.abodah.demo.repositories.DocumentRepository;
 import org.abodah.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,10 @@ public class NewDocumentController {
 
     @Autowired
     UserRepository userRepository;
-
+    
+    @Autowired
+    QRCodeGenerator qrCodeGenerator;
+    
     @GetMapping("/all")
     public Page<Document> getDocuments(Pageable pageable) {
         return this.documentRepository.findAll(pageable);

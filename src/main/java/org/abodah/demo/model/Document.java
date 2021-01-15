@@ -39,6 +39,7 @@ public class Document extends RepresentationModel<Document> implements Serializa
 	private String fileName;
 	private Date insertionDate;
 	private ETypeDoc typeDoc;
+	private byte[] qrCode;
 	
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "document_status")
@@ -137,6 +138,22 @@ public class Document extends RepresentationModel<Document> implements Serializa
 
 	public void setApprovedBy(User approvedBy) {
 		this.approvedBy = approvedBy;
+	}
+
+	public byte[] getQrCode() {
+		return qrCode;
+	}
+
+	public void setQrCode(byte[] qrCode) {
+		this.qrCode = qrCode;
+	}
+
+	public Occupation getOcupation() {
+		return ocupation;
+	}
+
+	public void setOcupation(Occupation ocupation) {
+		this.ocupation = ocupation;
 	}
 
 }
